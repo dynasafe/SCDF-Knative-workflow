@@ -1,0 +1,53 @@
+
+# curl -i -N -H "Connection: Upgrade" \
+#         -H "Upgrade: websocket" \
+#         -H "Sec-Websocket-Version: 13" \
+#         -H "Sec-WebSocket-Key: 123"\
+#         http://127.0.0.1:8081/ws > out.txt 2>&1
+
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kafka-consumer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kafka-consumer
+  template:
+    metadata:
+      labels:
+        app: kafka-consumer
+    spec:
+      containers:
+        - name: kafka-consumer
+          image: docker.io/tsunejui/knative-kafka-consumer
+          env:
+            - name: KAFKA_HOST
+              value: "192.168.0.10:9092" # please change the host ip and port number
+            - name: KAFKA_TOPIC
+              value: "test-events" # please type your kafka topic
+            - name: LISTEN_PORT
+              value: "8080"
+          ports:
+            - name: http
+              containerPort: 8080
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: kafka-consumer
+  labels:
+    app: kafka-consumer
+spec:
+  type: NodePort
+  ports:
+    - name: socket
+      protocol: TCP
+      port: 8080
+      nodePort: 30004
+  selector:
+    app: kafka-consumer

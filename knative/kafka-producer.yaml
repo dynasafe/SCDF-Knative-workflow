@@ -1,0 +1,18 @@
+# curl -H "Host: kafka-producer.default.example.com" -d '{"message":"abc22"}' http://10.250.123.7/send-msg
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: kafka-producer
+  namespace: default
+spec:
+  template:
+    spec:
+      containers:
+        - image: docker.io/tsunejui/knative-kafka-producer
+          env:
+            - name: KAFKA_HOST
+              value: "192.168.0.10:9092" # please change the host ip and port number
+            - name: KAFKA_TOPIC
+              value: "test-events" # please type your kafka topic
+            - name: LISTEN_PORT
+              value: "8080"

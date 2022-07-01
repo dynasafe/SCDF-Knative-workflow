@@ -1,0 +1,9 @@
+{
+  "runtimeOptions": {
+    "rollForward": "Major",
+    "framework": {
+      "name": "Microsoft.NETCore.App",
+      "version": "5.0.0"
+    }
+  }
+}

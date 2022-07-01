@@ -1,0 +1,38 @@
+FROM registry.access.redhat.com/redhat-openjdk-18/openjdk18-openshift
+
+#ARG uid=0
+#ARG gid=0
+USER 0
+
+#========================install rpms========================
+#RUN mkdir /rpms
+#WORKDIR /rpms
+#ADD ./rpms /rpms
+#RUN rpm -ivh --nodigest --nofiledigest /rpms/*
+
+#RUN java -version
+
+
+#========================add scdf executor and jobs========================
+RUN mkdir /testfiles
+WORKDIR /testfiles
+
+ADD ./scdf-task01.jar /testfiles/
+ADD ./externalProgramFiles/* /testfiles/
+RUN chmod 777 -Rf /testfiles
+
+RUN mkdir /configs
+ADD ./execution.properties /configs/execution.properties
+RUN chmod 777 -Rf /configs/execution.properties
+
+
+
+#========================run scdf========================
+USER 1001
+
+ENTRYPOINT ["/bin/java","-jar","-Dspring.config.location=/configs/execution.properties","/testfiles/scdf-task01.jar"]
+#CMD ["/bin/java","-jar","-Dspring.config.location=/configs/execution.properties","/testfiles/scdf-task01.jar"]
+
+
+# For Test
+#CMD ["tail","-f","/dev/null"]
