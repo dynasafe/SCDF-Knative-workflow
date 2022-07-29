@@ -30,9 +30,9 @@ spec:
               value: "test-events" # please type your kafka topic
             - name: LISTEN_PORT
               value: "8080"
-            - name: SAML_USERNAME
+            - name: SASL_USERNAME
               value: "client"
-            - name: SAML_PASSWORD
+            - name: SASL_PASSWORD
               value: "client-secret"
           ports:
             - name: http
