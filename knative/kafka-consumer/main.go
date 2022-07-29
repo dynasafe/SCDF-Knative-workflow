@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"crypto/tls"
 	"log"
 	"net/http"
 	"os"
@@ -19,6 +20,7 @@ var (
 	ENV_LISTEN_PORT = "LISTEN_PORT"
 	ENV_USERNAME    = "SASL_USERNAME"
 	ENV_PASSWORD    = "SASL_PASSWORD"
+	ENV_SKIP_TLS    = "SKIP_TLS"
 )
 
 func getKafkaReader(kafkaURL, topic string) *kafka.Reader {
@@ -32,6 +34,12 @@ func getKafkaReader(kafkaURL, topic string) *kafka.Reader {
 		Timeout:       10 * time.Second,
 		DualStack:     true,
 		SASLMechanism: mechanism,
+	}
+
+	if os.Getenv(ENV_SKIP_TLS) == "true" {
+		dialer.TLS = &tls.Config{
+			InsecureSkipVerify: true,
+		}
 	}
 
 	return kafka.NewReader(kafka.ReaderConfig{

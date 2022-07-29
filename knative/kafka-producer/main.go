@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -18,6 +19,7 @@ var (
 	ENV_LISTEN_PORT = "LISTEN_PORT"
 	ENV_USERNAME    = "SASL_USERNAME"
 	ENV_PASSWORD    = "SASL_PASSWORD"
+	ENV_SKIP_TLS    = "SKIP_TLS"
 )
 
 type SCDFEvent struct {
@@ -32,6 +34,12 @@ func newKafkaWriter(kafkaURL, topic string) *kafka.Writer {
 
 	sharedTransport := &kafka.Transport{
 		SASL: mechanism,
+	}
+
+	if os.Getenv(ENV_SKIP_TLS) == "true" {
+		sharedTransport.TLS = &tls.Config{
+			InsecureSkipVerify: true,
+		}
 	}
 
 	return &kafka.Writer{
@@ -76,7 +84,6 @@ func handleRequest(kw *kafka.Writer) func(w http.ResponseWriter, r *http.Request
 }
 
 func main() {
-
 	kafkaURL := os.Getenv(ENV_KAFKA_HOST)
 	topic := os.Getenv(ENV_KAFKA_TOPIC)
 	writer := newKafkaWriter(kafkaURL, topic)
