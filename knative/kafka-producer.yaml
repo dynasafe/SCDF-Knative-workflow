@@ -3,7 +3,6 @@ apiVersion: serving.knative.dev/v1
 kind: Service
 metadata:
   name: kafka-producer
-  namespace: default
 spec:
   template:
     spec:
