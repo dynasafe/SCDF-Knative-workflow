@@ -1,0 +1,13 @@
+# curl -H "Host: simple-http-server.default.example.com" http://10.111.194.60/hello
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: simple-http-server
+spec:
+  template:
+    spec:
+      containers:
+        - image: docker.io/tsunejui/simple-http-server
+          env:
+            - name: LISTEN_PORT
+              value: "8080"
