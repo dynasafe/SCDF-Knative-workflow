@@ -1,10 +1,19 @@
 node {
+    
+    def scdfExecutorGit='git@github.com:MilkLiver/scdf-samples-executor.git'
+    def scdfJobGit='git@github.com:MilkLiver/scdf-samples-job-java.git'
+    
+    def scdfExecutorPath='./scdfExecutor'
+    def scdfJobPath='./scdfJob'
+    
+    def scdfJobGitDirName='scdf-java01'
+    def scdfArtifactPath
+    
     def mvnHome
     def mvnWorkspace = './'
     def appVersion
 
     def loginImageRegistry = 'docker.io'
-    def imageBuildHome='./'
     def imagePushRegistry='docker.io/milkliver/java-task01'
     
     def dockerfilePath = './Dockerfile'
@@ -12,22 +21,57 @@ node {
     def scdfAppName = "java-application03"
     def scdfTaskName = "java-task03"
 
-    stage('Preparation') { // for display purposes
-        // Get some code from a GitHub repository
-        sh 'rm -rf *'
-        git branch: 'main', credentialsId: 'neil-github', url: 'git@github.com:MilkLiver/scdf-java01.git'
+    stage('initial') {
+        sh "rm -rf $scdfExecutorPath"
+        sh "rm -rf $scdfJobPath"
+        
+        sh "mkdir -p $scdfExecutorPath"
+        sh "mkdir -p $scdfJobPath"
+        sh "mkdir -p /tmp/jenkins/${JOB_NAME}_${BUILD_NUMBER}_artifact"
+        scdfArtifactPath="/tmp/jenkins/${JOB_NAME}_${BUILD_NUMBER}_artifact"
+        sh "mkdir -p $scdfArtifactPath/resources"
+        
         // Get the Maven tool.
         mvnHome = tool name: 'Default', type: 'maven'
     }
+
+    // SCDF Executor
+    stage('git pull scdf executor') {
+        dir("$scdfExecutorPath"){
+            git branch: 'kafka-producer', credentialsId: 'neil-github', url: "$scdfExecutorGit"
+        }
+    }
     
-    stage('mvnBuild') {
-        // Run the maven build
+    stage('mvn build executor') {
         withEnv(["MVN_HOME=$mvnHome"]) {
-            dir("$mvnWorkspace") {
+            dir("$scdfExecutorPath") {
                 sh 'echo $MVN_HOME'
-                sh '$MVN_HOME/bin/mvn clean package'
-                sh "mkdir externalProgramFiles"
-                sh "cp ./target/*.jar ./externalProgramFiles/"
+                sh '$MVN_HOME/bin/mvn clean package -DskipTests'
+                sh "cp ./target/*.jar $scdfArtifactPath/"
+                sh "cp ./src/main/resources/truststore/cacerts $scdfArtifactPath/resources/"
+                // sh "cp ./src/main/resources/application.properties $scdfArtifactPath/execution.properties"
+                // appVersion = sh script:"$MVN_HOME/bin/mvn help:evaluate -Dexpression=project.version -q -DforceStdout",returnStdout: true
+                // echo "version: $appVersion"
+            }
+        }
+    }
+    
+    // SCDF Job
+    stage('git pull scdf job') {
+        dir("$scdfJobPath"){
+            git branch: 'kafka-producer', credentialsId: 'neil-github', url: "$scdfJobGit"
+        }
+    }
+    
+    stage('mvn build job') {
+        withEnv(["MVN_HOME=$mvnHome"]) {
+            dir("$scdfJobPath") {
+                sh 'echo $MVN_HOME'
+                sh '$MVN_HOME/bin/mvn clean package -DskipTests'
+                sh "cp ./target/*.jar $scdfArtifactPath/"
+                sh "cp ./Dockerfile $scdfArtifactPath/"
+                sh "cp -Rf ./rpms $scdfArtifactPath/"
+                sh "cp ./execution.properties $scdfArtifactPath/execution.properties"
                 appVersion = sh script:"$MVN_HOME/bin/mvn help:evaluate -Dexpression=project.version -q -DforceStdout",returnStdout: true
                 echo "version: $appVersion"
             }
@@ -37,10 +81,10 @@ node {
     stage('imageBuild') {
         // Run the image build
         withCredentials([usernamePassword(credentialsId: 'neil-dockerhub', passwordVariable: 'dockerPassword', usernameVariable: 'dockerUsername')]) {
-            dir("$imageBuildHome") {
-                sh "buildah --version"
-                sh "buildah login -u $dockerUsername -p $dockerPassword $loginImageRegistry"
-                sh "buildah bud -t $imagePushRegistry:$appVersion ."
+            dir("$scdfArtifactPath") {
+                sh "sudo buildah --version"
+                sh "sudo buildah login -u $dockerUsername -p $dockerPassword $loginImageRegistry"
+                sh "sudo buildah bud --add-host=testhostname.domain:127.0.0.1 -t $imagePushRegistry:$appVersion-${BUILD_NUMBER} $dockerfilePath"
             }
         }
     }
@@ -48,18 +92,24 @@ node {
     stage('imagePush') {
         // Run the image push
         withCredentials([usernamePassword(credentialsId: 'neil-dockerhub', passwordVariable: 'dockerPassword', usernameVariable: 'dockerUsername')]) {
-            dir("$imageBuildHome") {
-                sh "podman --version"
-                sh "podman login -u $dockerUsername -p $dockerPassword $loginImageRegistry"
-                sh "podman push $imagePushRegistry:$appVersion"
+            dir("$scdfArtifactPath") {
+                sh "sudo buildah --version"
+                sh "sudo buildah login -u $dockerUsername -p $dockerPassword $loginImageRegistry"
+                sh "sudo buildah push $imagePushRegistry:$appVersion-${BUILD_NUMBER}"
             }
         }
     }
+    
+    // stage('clean up tmp files') {
+    //     sh "rm -rf $scdfExecutorPath"
+    //     sh "rm -rf $scdfJobPath"
+    //     sh "rm -rf $scdfArtifactPath"
+    // }
 
     stage('scdf add app') {
         // Run the scdf add app
-        sh "curl --location --request POST 'http://dataflow.prd.tanzu/apps/task/$scdfAppName?uri=docker://$imagePushRegistry:$appVersion&force=false'"
-        sh "curl --location --request PUT 'http://dataflow.prd.tanzu/apps/task/$scdfAppName/$appVersion'"
-        //sh "curl --location --request POST 'http://dataflow.prd.tanzu/tasks/definitions?definition=$scdfAppName&name=$scdfTaskName&description= '"
+        sh "curl --location --request POST 'http://dataflow.prd.tanzu/apps/task/$scdfAppName?uri=docker://$imagePushRegistry:$appVersion-${BUILD_NUMBER}&force=false'"
+        sh "curl --location --request PUT 'http://dataflow.prd.tanzu/apps/task/$scdfAppName/$appVersion-${BUILD_NUMBER}'"
+        // sh "curl --location --request POST 'http://dataflow.prd.tanzu/tasks/definitions?definition=$scdfAppName&name=$scdfTaskName&description= '"
     }
 }
