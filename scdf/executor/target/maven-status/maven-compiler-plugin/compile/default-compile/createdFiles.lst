@@ -1,0 +1,9 @@
+com\milkliver\samples\scdfexecutor01\kafka\MessageProducer.class
+com\milkliver\samples\scdfexecutor01\utils\CommandTools$Worker.class
+com\milkliver\samples\scdfexecutor01\utils\MyX509TrustManager.class
+com\milkliver\samples\scdfexecutor01\utils\SendRequest.class
+com\milkliver\samples\scdfexecutor01\utils\SendRequest$1.class
+com\milkliver\samples\scdfexecutor01\utils\CommandTools$1.class
+com\milkliver\samples\scdfexecutor01\ScdfExecutor01Application.class
+com\milkliver\samples\scdfexecutor01\task\MainTask.class
+com\milkliver\samples\scdfexecutor01\utils\CommandTools.class
