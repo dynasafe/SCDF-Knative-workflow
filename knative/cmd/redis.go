@@ -84,7 +84,7 @@ func (RedisConn) Connect() error {
 			val, err := rdb.Get(ctx, keyName).Result()
 			if err == redis.Nil {
 				count++
-				fmt.Printf("[%d] key does not exist", count)
+				fmt.Printf("[%d] key does not exist \n", count)
 				continue // if value doesn't exist, keep searching
 			} else if err != nil {
 				getKeyErr = fmt.Errorf("failed to get this key: %v", err)
@@ -116,5 +116,7 @@ func (RedisConn) Connect() error {
 	if exitCode != 0 {
 		return fmt.Errorf("failed to execute the job: exit(%d)", exitCode)
 	}
+
+	fmt.Printf("batch job has done, status: %t\n", signal.Request.Status)
 	return nil
 }
