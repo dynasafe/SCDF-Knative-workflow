@@ -30,13 +30,14 @@ type SCDFSignal struct {
 }
 
 /*
-	go run ./cmd/... --mode=redis \
-				--scdf-host="http://dataflow.prd.tanzu/tasks/executions?name=java-task03" \
-				--redis-host=10.250.75.117:26379 \
-				--redis-db=0 \
-				--redis-master-name=mymaster \
-				--redis-pass=str0ng_passw0rd
-				--redis-username=default
+	go run ./cmd/...
+		--mode=redis \
+		--scdf-host="http://dataflow.prd.tanzu/tasks/executions?name=java-task03" \
+		--redis-host=10.250.75.117:26379 \
+		--redis-db=0 \
+		--redis-master-name=mymaster \
+		--redis-pass=str0ng_passw0rd
+		--redis-username=default
 */
 func (RedisConn) Connect() error {
 	redisOptions := &redis.FailoverOptions{

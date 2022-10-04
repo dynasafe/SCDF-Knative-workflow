@@ -6,14 +6,16 @@ import (
 	"knative-example/pkg"
 )
 
-// usage:
-// 		go run cmd/main.go \
-//			--kafka-host=192.168.50.135:9092 \
-//			--kafka-topic=quickstart-events \
-//			--scdf-host="http://dataflow.prd.tanzu/tasks/executions?name=java-task03" \
-//			--sasl-username=client \
-//			--sasl-password=client-secret \
-//			--skip-tls=false
+/* usage:
+ 		go run cmd/main.go \
+			--mode=kafka \
+			--kafka-host=192.168.50.135:9092 \
+			--kafka-topic=quickstart-events \
+			--scdf-host="http://dataflow.prd.tanzu/tasks/executions?name=java-task03" \
+			--sasl-username=client \
+			--sasl-password=client-secret \
+			--skip-tls=false
+*/
 const (
 	KAFKA_CONNECTION_NAME = "kafka"
 )
