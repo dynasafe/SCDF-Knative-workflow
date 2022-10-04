@@ -1,4 +1,4 @@
 -------------------------------------------------------------------------------
 Test set: com.milkliver.samples.scdfexecutor01.ScdfExecutor01ApplicationTests
 -------------------------------------------------------------------------------
-Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 6.329 s - in com.milkliver.samples.scdfexecutor01.ScdfExecutor01ApplicationTests
+Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 7.96 s - in com.milkliver.samples.scdfexecutor01.ScdfExecutor01ApplicationTests
