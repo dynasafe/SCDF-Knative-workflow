@@ -43,7 +43,11 @@ func (RedisConn) Connect() error {
 	redisOptions := &redis.FailoverOptions{
 		MasterName:    redisMaster,
 		SentinelAddrs: []string{redisHost},
-		Password:      redisPass,
+	}
+
+	// password
+	if redisPass != "" {
+		redisOptions.Password = redisPass
 	}
 
 	// database

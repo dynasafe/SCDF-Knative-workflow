@@ -14,7 +14,7 @@ Flags:
       --redis-db string            [option] Please type Redis DB
       --redis-host string          Please type Redis endpoint
       --redis-master-name string   Please type Redis Sentinel master name
-      --redis-pass string          Please type Redis password
+      --redis-pass string          [option] Please type Redis password
       --redis-username string      [option] Please type Redis username
       --sasl-password string       Please type SASL password
       --sasl-username string       Please type SASL username
