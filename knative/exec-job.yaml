@@ -1,0 +1,26 @@
+# curl -X POST -H "Host: exec-job.default.example.com" -H "Content-Type: application/json" --data '{"command":"ls -al"}' http://127.0.0.1/exec-job
+# curl -X POST -H "Host: exec-job.default.example.com" -H "Content-Type: application/json" --data '{"command":"python test.py"}' http://127.0.0.1/exec-job
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: exec-job
+spec:
+  template:
+    spec:
+      containers:
+        - image: docker.io/tsunejui/cmd-executor:v0.0.8
+          env:
+            - name: LISTEN_PORT
+              value: "8080"
+            - name: LISTEN_PORT
+              value: "8080"
+            - name: REDIS_MASTER
+              value: "mymaster"
+            - name: REDIS_HOST
+              value: "10.250.75.117:26379"
+            # - name: REDIS_USER
+            #   value: "default"
+            - name: REDIS_PASS
+              value: "str0ng_passw0rd"
+            # - name: REDIS_DB
+            #   value: "0"

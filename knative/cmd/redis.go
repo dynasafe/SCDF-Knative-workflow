@@ -38,6 +38,19 @@ type SCDFSignal struct {
 		--redis-master-name=mymaster \
 		--redis-pass=str0ng_passw0rd
 		--redis-username=default
+
+	or
+
+	go run ./cmd/... \
+		--mode=redis \
+		--method=knative \
+		--kn-cmd="ls -al" \
+		--kn-host="exec-job.default.example.com" \
+		--kn-endpoint=http://127.0.0.1/exec-job \
+		--redis-host=10.250.75.117:26379 \
+		--redis-master-name=mymaster \
+		--redis-pass=str0ng_passw0rd
+
 */
 func (RedisConn) Connect() error {
 	redisOptions := &redis.FailoverOptions{
@@ -66,9 +79,26 @@ func (RedisConn) Connect() error {
 
 	rdb := redis.NewFailoverClient(redisOptions)
 	ctx := context.Background()
-	taskId, err := pkg.CallSCDFAPI(scdfHost)
-	if err != nil {
-		return fmt.Errorf("failed to invoke SCDF API: %v", err)
+
+	var taskId string
+
+	switch method {
+	case "scdf":
+		tId, err := pkg.CallSCDFAPI(scdfHost)
+		if err != nil {
+			return fmt.Errorf("failed to invoke SCDF API: %v", err)
+		}
+		taskId = tId
+	case "knative":
+		tId, err := pkg.CallKnativeAPI(pkg.KnativeRequest{
+			Endpoint: knEndpoint,
+			Host:     knHost,
+			Command:  knCommand,
+		})
+		if err != nil {
+			return fmt.Errorf("failed to invoke Knative API: %v", err)
+		}
+		taskId = tId
 	}
 
 	ch := make(chan SCDFSignal, 1)

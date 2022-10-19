@@ -11,6 +11,15 @@ type SCDFRequest struct {
 	Status   bool   `json:"status"`
 	TaskId   string `json:"taskid"`
 	ExitCode int    `json:"exit"`
+	Command  string `json:"command"`
+}
+
+func GenSCDFRequest(req SCDFRequest) (string, error) {
+	jsondata, err := json.Marshal(req)
+	if err != nil {
+		return "", fmt.Errorf("failed to marshal data: %v", err)
+	}
+	return string(jsondata), nil
 }
 
 func CallSCDFAPI(scdfHost string) (string, error) {

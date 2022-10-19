@@ -27,6 +27,10 @@ var (
 	saslPassword    string
 	skipTLS         bool
 	connectionTypes []ConnectionType
+	method          string
+	knHost          string
+	knEndpoint      string
+	knCommand       string
 )
 
 func init() {
@@ -35,8 +39,12 @@ func init() {
 		newRedisConn(),
 	)
 	rootCmd.PersistentFlags().StringVar(&connMode, "mode", "", fmt.Sprintf("Please type Connection mode: (ie: %s)", getModeNames()))
+	rootCmd.PersistentFlags().StringVar(&method, "method", "scdf", "Please type executing method: (ie: scdf or knative)")
 
 	// redis
+	rootCmd.PersistentFlags().StringVar(&knHost, "kn-host", "", "Please type Knative Host")
+	rootCmd.PersistentFlags().StringVar(&knEndpoint, "kn-endpoint", "", "Please type Knative endpoint")
+	rootCmd.PersistentFlags().StringVar(&knCommand, "kn-cmd", "", "Please input the command")
 	rootCmd.PersistentFlags().StringVar(&redisHost, "redis-host", "", "Please type Redis endpoint")
 	rootCmd.PersistentFlags().StringVar(&redisDB, "redis-db", "", "[option] Please type Redis DB")
 	rootCmd.PersistentFlags().StringVar(&redisMaster, "redis-master-name", "", "Please type Redis Sentinel master name")

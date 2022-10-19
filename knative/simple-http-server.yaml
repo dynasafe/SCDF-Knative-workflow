@@ -1,4 +1,4 @@
-# curl -H "Host: simple-http-server.default.example.com" http://10.111.194.60/hello
+# curl -H "Host: simple-http-server.default.example.com" http://10.110.45.158:32686/hello
 apiVersion: serving.knative.dev/v1
 kind: Service
 metadata:

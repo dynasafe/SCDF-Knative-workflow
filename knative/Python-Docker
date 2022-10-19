@@ -1,0 +1,24 @@
+# docker build -t helloworld-go --build-arg EXAMPLE_PROGRAM=hello-world .
+
+# Use the official Golang image to create a build artifact.
+# This is based on Debian and sets the GOPATH to /go.
+FROM golang:1.17 as builder
+
+ARG EXAMPLE_PROGRAM
+# Create and change to the app directory.
+WORKDIR /app
+
+# Copy local code to the container image.
+COPY . ./
+RUN go mod download
+
+# Build the binary.
+# -mod=readonly ensures immutable go.mod and go.sum in container builds.
+RUN CGO_ENABLED=0 GOOS=linux go build -mod=readonly -v -o server ./${EXAMPLE_PROGRAM}
+
+FROM registry.access.redhat.com/ubi8/python-38
+COPY --from=builder /app/server /app-root/server
+ADD ./example/* /app-root/
+WORKDIR /app-root
+
+CMD ["/app-root/server"]
